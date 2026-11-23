@@ -47,13 +47,25 @@ git clone https://github.com/1315577677/dsh-redactor.git
 
 安装后插件对所有 provider 生效（可通过 `providers` 配置限制）。
 
-### 方式二：从打包文件安装
+### 方式二：在插件页面填地址安装（推荐）
+
+打开 DSH 的 **Plugins** → **Add plugin**，填入 Release 附件的地址：
+
+```
+https://github.com/1315577677/dsh-redactor/releases/download/v0.1.0/local-dsh-redactor-0.1.0.tgz
+```
+
+确认后 DSH 会下载、安装并注册这个 bundle，无需先克隆仓库。
+
+### 方式三：从本地打包文件安装
+
+在仓库根目录执行：
 
 ```bash
 npm pack
 ```
 
-会生成 `dsh-redactor-0.1.0.tgz`，再用 DSH 的插件管理器安装该文件。
+会生成 `local-dsh-redactor-0.1.0.tgz`，再把该文件路径作为安装地址填入插件管理器（或使用 `plugin_manager` 的 `install_bundle`，target 指向该 tgz 文件）。
 
 ## 配置
 
