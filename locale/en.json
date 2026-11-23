@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "title": "Sensitive data redaction",
+    "description": "Reversible redaction between the agent loop and the model: the model only sees surrogate values, while the session log, tools and files keep the real ones. Includes a manual and auto-discovered word list stored encrypted in the profile.",
+    "detail": "docs/DETAIL.md"
+  },
+  "view": {
+    "title": "Sensitive data",
+    "sessionTab": "This session",
+    "globalTab": "All entries",
+    "empty": "Nothing has been redacted yet.",
+    "add": "Add",
+    "remove": "Remove",
+    "save": "Save",
+    "real": "Real value",
+    "fake": "Surrogate",
+    "kind": "Type",
+    "source": "Source",
+    "via": "Trigger",
+    "hits": "Hits",
+    "enabled": "Enabled",
+    "locked": "Vault locked",
+    "unlockHint": "The vault is sealed. Reopen this page to retry.",
+    "counterLabel": "Redacted values"
+  }
+}

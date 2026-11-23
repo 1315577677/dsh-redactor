@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "title": "敏感信息脱敏",
+    "description": "在 agent loop 与模型适配器之间做可逆脱敏：模型只看到假值，会话日志、工具和文件保留真值。词表支持手动添加与自动发现，并在 profile 内加密落盘。",
+    "detail": "docs/DETAIL.md"
+  },
+  "view": {
+    "title": "敏感信息",
+    "sessionTab": "本会话",
+    "globalTab": "全局词表",
+    "empty": "还没有命中任何敏感信息。",
+    "add": "添加",
+    "remove": "删除",
+    "save": "保存",
+    "real": "真值",
+    "fake": "假值",
+    "kind": "类型",
+    "source": "来源",
+    "via": "触发点",
+    "hits": "次数",
+    "enabled": "启用",
+    "locked": "词库未解锁",
+    "unlockHint": "词库无法解封，请重新打开此页面重试。",
+    "counterLabel": "已脱敏"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+*.tgz
+*.log
+vault.bin
+vault.bin.*
+vault.*.bin
+diag.log
+.DS_Store
+Thumbs.db

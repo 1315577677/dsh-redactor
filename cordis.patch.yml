@@ -1,0 +1,12 @@
+- insert:
+    - id: redactor
+      name: '@local/dsh-redactor'
+      config:
+        enabled: true
+        providers:
+          - '*'
+        strategy: surrogate
+        ipPool: documentation
+        emailDomain: mask
+        autoDiscover: true
+        autoAddObserved: false
