@@ -312,6 +312,11 @@ function looksLikeSecret(value) {
   if (/[\s`'"(){}[\]|*?\\<>]/.test(value)) return false
   if (/^(?:https?:\/\/|\/|[A-Za-z]:[\\/]|\$|\{\{|__)/.test(value)) return false
   if (/^\d+$/.test(value) && value.length < 8) return false
+  // Dotted / dashed / underscored identifier chains without a single digit are
+  // class names, config keys or log tags, never credentials.
+  if (/^[A-Za-z_$][A-Za-z0-9_$]*(?:[._-][A-Za-z0-9_$]+)+$/.test(value) && !/\d/.test(value)) return false
+  // CamelCase dotted names such as common.auth.ExternalAuthToken.
+  if (/^[A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z][A-Za-z0-9]*){2,}$/.test(value)) return false
   const classes = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter((re) => re.test(value)).length
   return classes >= 2
 }
@@ -321,6 +326,7 @@ function looksLikeAccount(value) {
   if (value.length < 3 || value.length > 64) return false
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value)) return false
   if (/^\d+$/.test(value)) return false
+  if (/^[A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+){2,}$/.test(value)) return false
   if (GENERIC_USERS.has(value.toLowerCase())) return false
   return true
 }
