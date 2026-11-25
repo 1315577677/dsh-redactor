@@ -300,7 +300,7 @@ const STRONG_RULES = [
   { kind: 'idcard', re: /(?<!\d)\d{17}[\dXx](?!\d)/g, check: idOk },
   { kind: 'ipv4', re: /(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])/g, check: isIpv4 },
   { kind: 'phone', re: /(?<!\d)1[3-9]\d{9}(?!\d)/g },
-  { kind: 'bankcard', re: /(?<!\d)\d{16,19}(?!\d)/g, check: luhnOk },
+  { kind: 'bankcard', re: /(?<!\d)\d{16,19}(?!\d)/g, check: (value) => /^[3-6]/.test(value) && luhnOk(value) },
 ]
 
 const SECRET_NAME = /^(?:[a-z0-9]+[_-])*(?:pass(?:word|wd)?|pwd|secret|token|api[_-]?key|access[_-]?key|private[_-]?key|credential|auth)$/i
@@ -362,13 +362,13 @@ function skipValue(kind, value) {
   return false
 }
 
-function collectMatches(vault, text) {
+function collectMatches(vault, text, meta) {
   const found = []
   const code = codeRanges(text)
   const add = (start, end, kind, value) => {
     if (end <= start) return
     if (skipValue(kind, value)) return
-    if (vault.isFake(value)) return
+    if (vault.isFake(value) && meta?.role !== 'user') return
     if ((kind === 'password' || kind === 'username') && inRanges(code, start)) return
     found.push({ start, end, kind, value })
   }
@@ -553,6 +553,17 @@ function createVault(config, logger) {
     return candidate
   }
 
+  function retireFake(fake) {
+    const entry = byFake.get(fake)
+    if (!entry) return
+    byFake.delete(fake)
+    const replacement = nextFake(entry.kind, entry.real)
+    entry.fake = replacement
+    byFake.set(replacement, entry)
+    if (replacement.length > maxFakeLen) maxFakeLen = replacement.length
+    scheduleSave()
+  }
+
   function ensureEntry(kind, real, source) {
     const existing = byReal.get(real)
     if (existing) return existing
@@ -679,6 +690,7 @@ function createVault(config, logger) {
     manualEntries,
     isFake,
     lookup: (real) => byReal.get(real),
+    retireFake,
     restoreList,
     get maxFakeLen() { return maxFakeLen },
     entries: () => entries,
@@ -697,7 +709,7 @@ function createVault(config, logger) {
 
 function rewriteText(vault, text, meta) {
   if (typeof text !== 'string' || text.length === 0) return text
-  const matches = collectMatches(vault, text)
+  const matches = collectMatches(vault, text, meta)
   if (matches.length === 0) return text
   matches.sort((left, right) => left.start - right.start || right.end - left.end)
   const chosen = []
@@ -712,6 +724,9 @@ function rewriteText(vault, text, meta) {
   const discover = meta?.discover !== false
   for (const match of chosen) {
     output += text.slice(last, match.start)
+    if (meta?.role === 'user' && vault.isFake(match.value) && !vault.lookup(match.value)) {
+      vault.retireFake(match.value)
+    }
     const entry = discover
       ? vault.ensureEntry(match.kind, match.value, 'rule')
       : vault.lookup(match.value)
@@ -752,7 +767,8 @@ function sanitizeBlock(vault, block, meta) {
 function sanitizeMessage(vault, message, meta) {
   if (!message || typeof message !== 'object') return message
   if (!Array.isArray(message.content)) return message
-  const scoped = message.role === 'assistant' ? { ...meta, discover: false } : meta
+  const role = typeof message.role === 'string' ? message.role : ''
+  const scoped = { ...meta, role, discover: role !== 'assistant' }
   return { ...message, content: message.content.map((block) => sanitizeBlock(vault, block, scoped)) }
 }
 
